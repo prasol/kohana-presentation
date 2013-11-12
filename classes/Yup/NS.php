@@ -1,8 +1,7 @@
 <?php
 
 /**
- * Статический класс NS предоставляет набор методов для работы
- * с пространствами имен.
+ * Static class with namespace parsing methods
  *
  * @package    Yup Presentation
  * @author     Yanis Prasol
@@ -50,22 +49,6 @@ class NS {
 	}
 	
 	/**
-	 * Возвращает имя модуля, к которому принадлежит класс
-	 *
-	 *     $foo = NS::extract_module_name('Root\Test\Foo');
-	 *     Значение $foo: 'Test'
-	 *     
-	 * @param   string|object	$class
-	 * @return  string
-	 */
-	public static function extract_module_name($class)
-	{
-		$parts = static::_split(static::_class_name($class));
-		
-		return (count($parts) > 1) ? $parts[1] : NULL;
-	}
-	
-	/**
 	 * Добавляет префикс к имени класса, которое может содержать указание
 	 * пространства имен
 	 *
@@ -101,7 +84,7 @@ class NS {
 	public static function remove_class_prefix($class, $prefix)
 	{
 		$result = static::extract_class_name($class);
-		if (substr(strtolower($result), 0, strlen($prefix)) == strtolower($prefix))
+		if (substr(strtolower($result), 0, strlen($prefix)) === strtolower($prefix))
 		{
 			$result = substr($result, strlen($prefix));
 		}

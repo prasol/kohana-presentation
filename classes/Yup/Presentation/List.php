@@ -9,233 +9,233 @@ namespace Yup;
 
 class Presentation_List implements \Countable, \Iterator, \SeekableIterator, \ArrayAccess {
 
-    /* @var array */
-    protected $_object_cache = array();
+	/* @var array */
+	protected $_object_cache = array();
 
-    /* @var array */
-    protected $_rows = FALSE;
+	/* @var array */
+	protected $_rows = FALSE;
 
-    /* @var int */
-    protected $_current_row = 0;
+	/* @var int */
+	protected $_current_row = 0;
 
-    /*
-     * @chainable
-     * @param  array $rows
-     * @return \Yup\Presentation_List
-     */
-    public static function factory(array $rows)
-    {
-        $obj = new static();
-        return $obj->set_rows($rows);
-    }
-
-    /*
-     * @chainable
-     * @param  array $rows
-     * @return \Yup\Presentation_List
-     */
-    public function set_rows(array $value)
-    {
-        $this->clear_cache();
-        $this->_rows = $value;
-
-        return $this;
-    }
-
-    /*
-     * @chainable
-     * @param  array $rows
-     * @return \Yup\Presentation_List
-     */
-    protected function clear_cache()
-    {
-        $this->_object_cache = array();
-
-        return $this;
-    }
-
-    /*
-     * @return mixed
-     */
-	public function current()
+	/*
+	 * @chainable
+	 * @param  array $rows
+	 * @return \Yup\Presentation_List
+	 */
+	public static function factory(array $rows)
 	{
-        if (! $this->valid())
-        {
-            return NULL;
-        }
-        if (! isset($this->_object_cache[$this->key()]))
-        {
-            $value = $this->_rows[$this->key()];
-            if (is_array($value))
-            {
-                $this->_object_cache[$this->key()] = Presentation_Data::factory()->set_source($value);
-            }
-            elseif ($value instanceof ORM)
-            {
-                $this->_object_cache[$this->key()] = Presentation_Model::factory($value);
-            }
-            else
-            {
-                $this->_object_cache[$this->key()] = $value;
-            }
-        }
-        return $this->_object_cache[$this->key()];
+		$obj = new static();
+		return $obj->set_rows($rows);
 	}
 
-    /*
-     * @param  string $key
-     * @return array
-     */
-    public function as_array($key = NULL)
-    {
-        $results = array();
+	/*
+	 * @chainable
+	 * @param  array $rows
+	 * @return \Yup\Presentation_List
+	 */
+	public function set_rows(array $value)
+	{
+		$this->clear_cache();
+		$this->_rows = $value;
 
-        foreach ($this as $row)
-        {
-            if ($key === NULL)
-            {
-                $results[] = $row->as_array();
-            }
-            else
-            {
-                $results[$row->$key] = $row->as_array();
-            }
-        }
+		return $this;
+	}
 
-        $this->rewind();
+	/*
+	 * @chainable
+	 * @param  array $rows
+	 * @return \Yup\Presentation_List
+	 */
+	protected function clear_cache()
+	{
+		$this->_object_cache = array();
 
-        return $results;
-    }
+		return $this;
+	}
 
-    /*
-     * @param  string $key
-     * @return array
-     */
-    public function as_indexed_array($key)
-    {
-        $results = array();
+	/*
+	 * @return mixed
+	 */
+	public function current()
+	{
+		if (! $this->valid())
+		{
+			return NULL;
+		}
+		if (! isset($this->_object_cache[$this->key()]))
+		{
+			$value = $this->_rows[$this->key()];
+			if (is_array($value))
+			{
+				$this->_object_cache[$this->key()] = Presentation_Data::factory()->set_source($value);
+			}
+			elseif ($value instanceof ORM)
+			{
+				$this->_object_cache[$this->key()] = Presentation_Model::factory($value);
+			}
+			else
+			{
+				$this->_object_cache[$this->key()] = $value;
+			}
+		}
+		return $this->_object_cache[$this->key()];
+	}
 
-        foreach ($this as $row)
-        {
-            $results[$row->$key] = $row;
-        }
+	/*
+	 * @param  string $key
+	 * @return array
+	 */
+	public function as_array($key = NULL)
+	{
+		$results = array();
 
-        $this->rewind();
+		foreach ($this as $row)
+		{
+			if ($key === NULL)
+			{
+				$results[] = $row->as_array();
+			}
+			else
+			{
+				$results[$row->$key] = $row->as_array();
+			}
+		}
 
-        return $results;
-    }
+		$this->rewind();
 
-    /*
-     * @return  integer
-     */
-    public function count()
-    {
-        return count($this->_rows);
-    }
+		return $results;
+	}
 
-    /*
-     * @param   int $offset
-     * @return  boolean
-     */
-    public function offsetExists($offset)
-    {
-        return ($offset >= 0 && $offset < $this->count());
-    }
+	/*
+	 * @param  string $key
+	 * @return array
+	 */
+	public function as_indexed_array($key)
+	{
+		$results = array();
 
-    /*
-     * @param   int $offset
-     * @return  mixed
-     */
-    public function offsetGet($offset)
-    {
-        if (! $this->seek($offset))
-        {
-            return NULL;
-        }
+		foreach ($this as $row)
+		{
+			$results[$row->$key] = $row;
+		}
 
-        return $this->current();
-    }
+		$this->rewind();
 
-    /*
-     * @param   int     $offset
-     * @param   mixed   $value
-     * @return  void
-     * @throws  \Kohana_Exception
-     */
-    final public function offsetSet($offset, $value)
-    {
-        throw new \Kohana_Exception('Calculated results are read-only');
-    }
+		return $results;
+	}
 
-    /*
-     * @param   int     $offset
-     * @param   mixed   $value
-     * @return  void
-     * @throws  \Kohana_Exception
-     */
-    final public function offsetUnset($offset)
-    {
-        throw new \Kohana_Exception('Calculated results are read-only');
-    }
+	/*
+	 * @return  integer
+	 */
+	public function count()
+	{
+		return count($this->_rows);
+	}
 
-    /*
-     * @return integer
-     */
-    public function key()
-    {
-        return $this->_current_row;
-    }
+	/*
+	 * @param   int $offset
+	 * @return  boolean
+	 */
+	public function offsetExists($offset)
+	{
+		return ($offset >= 0 && $offset < $this->count());
+	}
 
-    /*
-     * @chainable
-     * @return \Yup\Presentation_List
-     */
-    public function next()
-    {
-        ++$this->_current_row;
-        return $this;
-    }
+	/*
+	 * @param   int $offset
+	 * @return  mixed
+	 */
+	public function offsetGet($offset)
+	{
+		if (! $this->seek($offset))
+		{
+			return NULL;
+		}
 
-    /*
-     * @chainable
-     * @return \Yup\Presentation_List
-     */
-    public function prev()
-    {
-        --$this->_current_row;
-        return $this;
-    }
+		return $this->current();
+	}
 
-    /*
-     * @chainable
-     * @return \Yup\Presentation_List
-     */
-    public function rewind()
-    {
-        $this->_current_row = 0;
-        return $this;
-    }
+	/*
+	 * @param   int     $offset
+	 * @param   mixed   $value
+	 * @return  void
+	 * @throws  \Kohana_Exception
+	 */
+	final public function offsetSet($offset, $value)
+	{
+		throw new \Kohana_Exception('Calculated results are read-only');
+	}
 
-    /*
-     * @return boolean
-     */
-    public function valid()
-    {
-        return $this->offsetExists($this->_current_row);
-    }
+	/*
+	 * @param   int     $offset
+	 * @param   mixed   $value
+	 * @return  void
+	 * @throws  \Kohana_Exception
+	 */
+	final public function offsetUnset($offset)
+	{
+		throw new \Kohana_Exception('Calculated results are read-only');
+	}
 
-    /*
-     * @param int $position
-     * @return boolean
-     */
-    public function seek($position)
-    {
-        if ($this->offsetExists($position))
-        {
-            $this->_current_row = $position;
+	/*
+	 * @return integer
+	 */
+	public function key()
+	{
+		return $this->_current_row;
+	}
 
-            return TRUE;
-        }
-        return FALSE;
-    }
+	/*
+	 * @chainable
+	 * @return \Yup\Presentation_List
+	 */
+	public function next()
+	{
+		++$this->_current_row;
+		return $this;
+	}
+
+	/*
+	 * @chainable
+	 * @return \Yup\Presentation_List
+	 */
+	public function prev()
+	{
+		--$this->_current_row;
+		return $this;
+	}
+
+	/*
+	 * @chainable
+	 * @return \Yup\Presentation_List
+	 */
+	public function rewind()
+	{
+		$this->_current_row = 0;
+		return $this;
+	}
+
+	/*
+	 * @return boolean
+	 */
+	public function valid()
+	{
+		return $this->offsetExists($this->_current_row);
+	}
+
+	/*
+	 * @param int $position
+	 * @return boolean
+	 */
+	public function seek($position)
+	{
+		if ($this->offsetExists($position))
+		{
+			$this->_current_row = $position;
+
+			return TRUE;
+		}
+		return FALSE;
+	}
 }
