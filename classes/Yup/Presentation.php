@@ -12,27 +12,27 @@ abstract class Presentation {
 	/*
 	 * @var string
 	 */
-    public static $_class_prefix = 'Presentation';
+	public static $_class_prefix = 'Presentation';
 
-    /*
+	/*
 	 * @var string
 	 */
-    public static $_context = '';
+	public static $_context = '';
 
-    /*
+	/*
 	 * @var string
 	 */
-    public static $_type = '';
+	public static $_type = '';
 
 	/*
 	 * @var string
 	 */
 	protected $_data_key = '_presentation';
 
-    /*
-     * @var string
-     */
-    protected $_model_key = '_model';
+	/*
+	 * @var string
+	 */
+	protected $_model_key = '_model';
 
 	/*
 	 * @var array
@@ -64,10 +64,10 @@ abstract class Presentation {
 		return $this;
 	}
 
-    protected static function full_class_prefix()
-    {
-        return implode('_', array_filter([static::$_class_prefix, static::$_context, static::$_type])) . '_';
-    }
+	protected static function full_class_prefix()
+	{
+		return implode('_', array_filter([static::$_class_prefix, static::$_context, static::$_type])) . '_';
+	}
 
 	/*
 	 * @param  string $callback

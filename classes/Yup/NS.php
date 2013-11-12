@@ -10,10 +10,10 @@
 namespace Yup;
 
 class NS {
-	
+
 	// Разделитель сегментов пространств имен и принадлежащих им классов
 	const DELIMITER = '\\';
-	
+
 	/**
 	 * Возвращает пространство имен, к которому принадлежит класс,
 	 * или NULL если пространство имен не указано
@@ -28,10 +28,10 @@ class NS {
 	{
 		$parts = static::_split(static::_class_name($class));
 		array_pop($parts);
-		
+
 		return count($parts) ? implode(NS::DELIMITER, $parts) : NULL;
 	}
-	
+
 	/**
 	 * Возвращает имя класса без указания пространства имен
 	 *
@@ -47,7 +47,7 @@ class NS {
 
 		return count($parts) ? array_pop($parts) : NULL;
 	}
-	
+
 	/**
 	 * Добавляет префикс к имени класса, которое может содержать указание
 	 * пространства имен
@@ -66,10 +66,10 @@ class NS {
 		{
 			$result = static::add_namespace($result, $namespace);
 		}
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Удаляет возможный префикс из имени класса, которое может содержать указание
 	 * пространства имен. Регистр символов не учитывается
@@ -92,10 +92,10 @@ class NS {
 		{
 			$result = static::add_namespace($result, $namespace);
 		}
-		
+
 		return $result;
 	}
-	
+
 	/**
 	 * Добавляет к имени класса указание пространства имен
 	 *
@@ -110,7 +110,7 @@ class NS {
 	{
 		return $namespace . NS::DELIMITER . static::_class_name($class);
 	}
-	
+
 	/**
 	 * Определяет, содержит ли имя класса указание пространства имен
 	 *
@@ -126,7 +126,7 @@ class NS {
 	{
 		return static::extract_namespace($class) !== NULL;
 	}
-	
+
 	/**
 	 * Возвращает имя класса в строковом представлении
 	 *   
@@ -141,7 +141,7 @@ class NS {
 		}
 		return (string)$class;
 	}
-	
+
 	/**
 	 * Разделяет имя класса с пространством имен на массив сегментов
 	 *   

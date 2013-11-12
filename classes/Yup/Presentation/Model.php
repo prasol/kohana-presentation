@@ -12,7 +12,7 @@ class Presentation_Model extends Presentation {
 	/*
 	 * @var string
 	 */
-    public static $_type = 'Model';
+	public static $_type = 'Model';
 
 	/*
 	 * @var \Yup\ORM
