@@ -298,6 +298,7 @@ echo $user->name; // same as $user->get('name');
 ##### *Example*
 ~~~
 echo $user->original('name');
+~~~
 
 #### values
 -----
