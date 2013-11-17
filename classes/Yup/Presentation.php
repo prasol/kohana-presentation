@@ -35,6 +35,11 @@ abstract class Presentation {
 	protected $_model_key = '_model';
 
 	/*
+	 * @var string
+	 */
+	protected $_field_method_prefix = 'field_';
+
+	/*
 	 * @var array
 	 */
 	protected $_values_cache = array();
@@ -49,7 +54,7 @@ abstract class Presentation {
 	 */
 	public function __isset($field)
 	{
-		return array_key_exists($field, $this->fields());
+		return method_exists($this, $this->_field_method_prefix . $field);
 	}
 
 	/*
@@ -75,6 +80,10 @@ abstract class Presentation {
 	 */
 	protected function execute_callback($callback, $params = array())
 	{
+		if ($callback instanceof \Closure)
+		{
+			return call_user_func_array($callback, $params);
+		}
 		if (strpos($callback, '::') > 0)
 		{
 			list($class_alias, $method) = explode('::', $callback, 2);
@@ -143,9 +152,9 @@ abstract class Presentation {
 		{
 			return $this->_calculated_cache[$field];
 		}
-		if ($calc_rule = \Arr::get($this->fields(), $field))
+		if (method_exists($this, $method = $this->_field_method_prefix . $field))
 		{
-			$this->_calculated_cache[$field] = $this->calculate_value($calc_rule);
+			$this->_calculated_cache[$field] = $this->$method();
 			return $this->_calculated_cache[$field];
 		}
 		return $this->value($field);
@@ -254,9 +263,14 @@ abstract class Presentation {
 	public function as_array()
 	{
 		$result = $this->_as_array();
-		foreach ($this->fields() as $name => $callback)
+		$reflection = new \ReflectionClass($this);
+		foreach ($reflection->getMethods() as $method)
 		{
-			$result[$name] = $this->calculate_value($callback);
+			if (substr($method->name, 0, strlen($this->_field_method_prefix)) === $this->_field_method_prefix)
+			{
+				$field = substr($method->name, strlen($this->_field_method_prefix));
+				$result[$field] = $this->fetch_value($field);
+			}
 		}
 		return $result;
 	}
@@ -293,16 +307,6 @@ abstract class Presentation {
 	 * @return array
 	 */
 	public function rules()
-	{
-		return array();
-	}
-
-	/*
-	 * Override this method
-	 *
-	 * @return array
-	 */
-	public function fields()
 	{
 		return array();
 	}
