@@ -125,7 +125,7 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
 }
 ~~~
 
-Код модели не меняется, кроме наследования от \Yum\ORM:
+Код модели не меняется, кроме наследования от \Yup\ORM:
 
 ##### *classes/Model/User.php*
 ~~~
@@ -140,7 +140,7 @@ class Model_User extends ORM {
 ##### *classes/Controller/User.php*
 ~~~
 $user = new Model_User(1);
-$this->template->user = new Presentation_Model_User->set_model($user);
+$this->template->user = Present::model($user);
 ~~~
 
 Шаблон при этом лишается логики представление данных и содержит лишь разметку:
@@ -161,7 +161,7 @@ $this->template->user = new Presentation_Model_User->set_model($user);
 ##### *classes/Controller/Users.php*
 ~~~
 $users = (new Model_User())->find_all();
-$this->template->users = \Yup\Presentation_Database_Result::factory($users);
+$this->template->users = Present::db_result($users);
 ~~~
 
 ##### *views/user_list.php*
@@ -191,7 +191,7 @@ $this->template->users = \Yup\Presentation_Database_Result::factory($users);
 #### rules
 -----
 
-**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив правил, применяемых к полям сущности. Синтаксис похож на filters() в ORM, но немного видоизменен и расширен. Каждое значение -- массив, содержащий набор функций или методов, вызывающихся последовательно. При этом преобразуемое значение передается в метод/функцию первым параметром.
+**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив правил, применяемых к полям сущности. Синтаксис похож на filters() в ORM, но немного видоизменен и расширен. Каждое значение -- имя функции либо метода, анонимная функция, либо массив, содержащий набор функций или методов, вызывающихся последовательно. При этом преобразуемое значение передается в метод/функцию первым параметром.
 Например, если объявлено правило для `'note'    => ['HTML::chars', 'nl2br']`, то при запросе поля note к нему будет применен сначала метод `HTML::chars`, а потом к результату функция `nb2br`, значение которой и будет возвращено.
 Вместо указания класса перед `::` могут быть использованы алиасы `self` и `this` для вызова статичного или обычного метода текущего класса.
 Если требуется передать в метод либо функцию и другие параметры, то вместо строки элементом цепочки нужно поставить массив, в котором первым элементом будет строка с названием функции или метода, а остальные параметры будут добавлены при вызове после преобразуемого значения, например,  `'total_amount' => [['number_format', 2, '.', '']]`.
@@ -225,7 +225,7 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 
 #### get
 -----
-**Description**_: Возвращает преобразованное и пригодное к отображению значение поля. После первого вызова значение кэшируется. Вызывается магическим методом __get().
+**Description**_: Возвращает преобразованное и пригодное к отображению значение поля. После первого вызова значение кэшируется. Вызывается магическим методом __get(). Можно добавлять вычисляемые поля, создавая в классе методы с названием field_{имя поля}.
 
 ##### *Parameters*
 *string*: field Имя поля.
@@ -284,6 +284,15 @@ $state_caption = \Yup\Presenter::values($state, [
 -----
 **Description**_: очищает внутренний кэш для преобразованных и рассчитанных полей. 
 
+#### $_context
+-----
+**Description**_: Статичное свойство, позволяет менять префикс для создаваемых классов, в случаа нескольких различных контекстов вывода (например, для XML или JSON). 
+
+##### *Example*
+~~~
+\Yup\Presentation::$_context = 'XML';
+~~~
+
 ### \Yup\Presentation_Model
 
 Реализация Presentation для обработки ORM-моделей.
@@ -297,7 +306,7 @@ $state_caption = \Yup\Presenter::values($state, [
 Не обязательный параметр. Если задан, класс определяется на основе класса модели. Можно передавать как имя класса, так и экземпляр модели. Если не задан, создается экземпляр класса, метод которого вызван.
 
 ##### *Return value*
-*\Yum\Presentation_Model*
+*\Yup\Presentation_Model*
 
 ##### *Example*
 ~~~
@@ -313,10 +322,10 @@ $user = \Yup\Presentation_Model::factory($user_model);
 **Description**_: Сеттер, задающий значение модели.
 
 ##### *Parameters*
-*\Yum\ORM*: model
+*\Yup\ORM*: model
 
 ##### *Return value*
-*\Yum\Presentation_Model*: $this
+*\Yup\Presentation_Model*: $this
 
 #### make
 -----
@@ -326,7 +335,7 @@ $user = \Yup\Presentation_Model::factory($user_model);
 *array*: $fields
 
 ##### *Return value*
-*\Yum\Presentation_Model*: $this
+*\Yup\Presentation_Model*: $this
 
 ##### *Example*
 ~~~
@@ -399,4 +408,76 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 <option name="processing" selected="selected">In process</option>
 <option name="completed">Done</option>
 </select>
+~~~
+
+### \Present
+
+Набор статичных методов, предоставляющих упрощенные вызовы для создания презентационных классов.
+
+#### model
+-----
+**Description**_: Метод для создания Presentation Model на осове ORM-модели.
+
+##### *Parameters*
+*\Yup\ORM*: model
+
+##### *Return value*
+*\Yup\Presentation_Model*
+
+##### *Example*
+~~~
+$user = new Model_User(1);
+$this->template->user = Present::model($user);
+~~~
+
+#### data
+-----
+**Description**_: Метод для создания Presentation Model на осове произвольных именованных данных.
+
+##### *Parameters*
+*string*: name
+*array*: data
+
+##### *Return value*
+*\Yup\Presentation_Data*
+
+##### *Example*
+~~~
+$data = ['currency_id' => 1, 'amount' => 5.5];
+$this->template->currency = Present::data('currency', $data);
+~~~
+
+#### db_result
+-----
+**Description**_: Метод для создания обертки для списковых данных, полученных из БД.
+
+##### *Parameters*
+*\Database_Result*: db_result
+
+##### *Return value*
+*\Yup\Presentation_Database_Result*
+
+##### *Example*
+~~~
+$users = (new Model_User())->find_all();
+$this->template->users = Present::db_result($users);
+~~~
+
+#### data_list
+-----
+**Description**_: Метод для создания обертки-итератора для произвольных списковых данных.
+
+##### *Parameters*
+*array*: list
+
+##### *Return value*
+*\Yup\Presentation_List*
+
+##### *Example*
+~~~
+$products = array(
+    Present::data('product', $this->get_product_data(1)),
+    Present::data('product', $this->get_product_data(2)),
+);
+$this->template->products = Present::data_list($products);
 ~~~
