@@ -118,14 +118,7 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
         return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
     }
     
-    public function fields()
-    {
-        return [
-            'full_name' => 'this::full_name'
-        ];
-    }
-    
-    protected function full_name()
+    protected function field_full_name()
     {
         return $this->first_name . ' ' . $this->last_name;
     }
@@ -228,46 +221,6 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
         ];
     }
 }
-~~~
-
-#### fields
------
-**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив виртуальных полей, значение которых будет вычислено в момент вызова. Для потребителя такие поля ничем не будут отличаться от обычных. Правила преобразования будут применены к этим полям, если они существуют.
-
-##### *Parameters*
-*no parameters*
-
-##### *Return value*
-*array*
-
-##### *Example*
-~~~
-class Presentation_Model_Product extends \Yup\Presentation_Model {
-
-    public function rules()
-    {
-        return [
-            'amount' => [['number_format', 2, '.', '']],
-            'currency' => ['HTML::chars'],
-        ];
-    }
-    
-    public function fields()
-    {
-        return [
-            'amount_with_currency' => 'this::amount_with_currency',
-        ];
-    }
-    
-    protected function amount_with_currency()
-    {
-       return $this->amount . ' ' . $this->currency;
-    }
-}
-
-// ...
-echo $product->amount_with_currency;
-// will return value like "15.50 USD". 
 ~~~
 
 #### get
