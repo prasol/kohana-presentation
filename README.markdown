@@ -24,7 +24,7 @@ timestamp last_login
 
 ##### *classes/Model/User.php*
 ~~~
-class Model_User extends ORM {
+class Model_User extends \Yup\ORM {
 
     // Some data access and domain logic
 }
@@ -129,7 +129,7 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
 
 ##### *classes/Model/User.php*
 ~~~
-class Model_User extends ORM {
+class Model_User extends \Yup\ORM {
 
 	// Some data access and domain logic
 }
