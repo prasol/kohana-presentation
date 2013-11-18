@@ -103,19 +103,16 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
 	public function rules()
     {
         return [
-            'first_name' => ['HTML::chars'],
-            'last_name'  => ['HTML::chars'],
-            'last_login' => ['self::time_format'],
+            'first_name' => 'HTML::chars',
+            'last_name'  => 'HTML::chars',
+            'last_login' => function($value){
+                return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
+            },
             'gender' => [['self::values', [
                 'm' => __('Male'),
                 'f' => __('Female'),
             ]]],
         ];
-    }
-    
-    protected static function time_format($value)
-    {
-        return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
     }
     
     protected function field_full_name()
@@ -209,7 +206,7 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
     public function rules()
     {
         return [
-            'created'      => ['Date::formatted_time'],
+            'created'      => 'Date::formatted_time',
 			'total_amount' => [['number_format', 2, '.', '']],
             'state'   => [['self::values', [
                 'new'        => __('New'),
