@@ -40,7 +40,7 @@ $this->template->gender_captions = ['m' => __('Male'), 'f' => __('Female')];
 
 ##### *views/user_display.php*
 ~~~
-<h3>User <?= htmlspecialchars($user->first_name) > <?= htmlspecialchars($user->last_name) ?></h3>
+<h3>User <?= HTML::chars($user->first_name) > <?= HTML::chars($user->last_name) ?></h3>
 <table>
 <tr>
 <td>Gender: <?= $gender_captions[$user->gender] ?></td>
@@ -67,7 +67,7 @@ $this->template->gender_captions = ['m' => __('Male'), 'f' => __('Female')];
 </tr>
 <? foreach ($this->users as $user): ?>
 <tr>
-<td><?= htmlspecialchars($user->first_name) > <?= htmlspecialchars($user->last_name) ?></td>
+<td><?= HTML::chars($user->first_name) > <?= HTML::chars($user->last_name) ?></td>
 <td>Last login: <?= $user->last_login === '0000-00-00 00:00:00' ? 'Never' : Date::formatted_time($user->last_login) ?></td>
 <td>Gender: <?= $gender_captions[$user->gender] ></td>
 </tr>
