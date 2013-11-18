@@ -179,6 +179,8 @@ $this->template->users = Present::db_result($users);
 </table>
 ~~~
 
+Получаемыезначения кешируются, и не будут высчитываться при повторных вызовах.
+
 ## Классы и методы
 
 ### \Yup\Presentation
