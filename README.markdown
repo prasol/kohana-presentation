@@ -108,10 +108,10 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
             'last_login' => function($value){
                 return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
             },
-            'gender' => [['self::values', [
+            'gender' => $this->replace([
                 'm' => __('Male'),
                 'f' => __('Female'),
-            ]]],
+            ]),
         ];
     }
     
@@ -210,12 +210,12 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
         return [
             'created'      => 'Date::formatted_time',
 			'total_amount' => [['number_format', 2, '.', '']],
-            'state'   => [['self::values', [
+            'state'   => $this->replace([
                 'new'        => __('New'),
                 'processing' => __('In process'),
                 'completed'  => __('Done'),
                 'cancelled'  => __('Cancelled'),
-            ]]],
+            ]),
             'note'    => ['HTML::chars', 'nl2br'],            
         ];
     }
@@ -252,28 +252,15 @@ echo $user->name; // same as $user->get('name');
 echo $user->original('name');
 ~~~
 
-#### values
+#### replace
 -----
-**Description**_: Вспомогательный статичный метод для использования в правилах преобразования в потомках. Заменяет параметр value на значение элемента массива replacements, если найден соответствующий ключ.
+**Description**_: Вспомогательный метод для использования в правилах преобразования в потомках. Возвращает функцию, заменяющую исходное значение на значение элемента массива replacements при вызове.
 
 ##### *Parameters*
-*string*: value Сравниваемое значение.
-
 *array*: replacements Ассоциативный массив для заменяемых значений.
 
 ##### *Return value*
 *string*: Результат замены, или оригинальная строка, если соотвествия не найдено.
-
-##### *Example*
-~~~
-$state = 'completed';
-$state_caption = \Yup\Presenter::values($state, [
-	'new' => 'New',
-	'completed' => 'Done',
-]);
-
-// return 'Done'
-~~~
 
 #### as_array
 -----
@@ -384,11 +371,11 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 	public function rules()
     {
         return [
-            'state' => [['self::values', [
+            'state' => $this->replace([
                 'new'        => __('New'),
                 'processing' => __('In process'),
                 'completed'  => __('Done'),
-            ]]],
+            ]),
         ];
     }
 }

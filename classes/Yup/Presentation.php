@@ -274,20 +274,21 @@ abstract class Presentation {
 		}
 		return $result;
 	}
-
+	
 	/*
-	 * @param  mixed $value
 	 * @param  array $replacements
 	 * @return mixed
 	 */
-	public static function values($value, array $replacements)
+	protected function replace(array $replacements)
 	{
-		if (array_key_exists($value, $replacements))
-		{
-			return $replacements[$value];
-		}
-
-		return $value;
+        return function($value) use ($replacements)
+        {
+            if (array_key_exists($value, $replacements))
+            {
+                return $replacements[$value];
+            }
+            return $value;
+        };
 	}
 
 	/*
