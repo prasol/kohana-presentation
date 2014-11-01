@@ -24,7 +24,7 @@ timestamp last_login
 
 ##### *classes/Model/User.php*
 ~~~
-class Model_User extends ORM {
+class Model_User extends \Yup\ORM {
 
     // Some data access and domain logic
 }
@@ -40,7 +40,7 @@ $this->template->gender_captions = ['m' => __('Male'), 'f' => __('Female')];
 
 ##### *views/user_display.php*
 ~~~
-<h3>User <?= htmlspecialchars($user->first_name) > <?= htmlspecialchars($user->last_name) ?></h3>
+<h3>User <?= HTML::chars($user->first_name) > <?= HTML::chars($user->last_name) ?></h3>
 <table>
 <tr>
 <td>Gender: <?= $gender_captions[$user->gender] ?></td>
@@ -67,7 +67,7 @@ $this->template->gender_captions = ['m' => __('Male'), 'f' => __('Female')];
 </tr>
 <? foreach ($this->users as $user): ?>
 <tr>
-<td><?= htmlspecialchars($user->first_name) > <?= htmlspecialchars($user->last_name) ?></td>
+<td><?= HTML::chars($user->first_name) > <?= HTML::chars($user->last_name) ?></td>
 <td>Last login: <?= $user->last_login === '0000-00-00 00:00:00' ? 'Never' : Date::formatted_time($user->last_login) ?></td>
 <td>Gender: <?= $gender_captions[$user->gender] ></td>
 </tr>
@@ -103,40 +103,30 @@ class Presentation_Model_User extends \Yup\Presentation_Model {
 	public function rules()
     {
         return [
-            'first_name' => ['HTML::chars'],
-            'last_name'  => ['HTML::chars'],
-            'last_login' => ['self::time_format'],
-            'gender' => [['self::values', [
+            'first_name' => 'HTML::chars',
+            'last_name'  => 'HTML::chars',
+            'last_login' => function($value){
+                return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
+            },
+            'gender' => $this->replace([
                 'm' => __('Male'),
                 'f' => __('Female'),
-            ]]],
+            ]),
         ];
     }
     
-    protected static function time_format($value)
-    {
-        return ($value === '0000-00-00 00:00:00') ? 'Never' : Date::formatted_time($value);
-    }
-    
-    public function fields()
-    {
-        return [
-            'full_name' => 'this::full_name'
-        ];
-    }
-    
-    protected function full_name()
+    protected function field_full_name()
     {
         return $this->first_name . ' ' . $this->last_name;
     }
 }
 ~~~
 
-Код модели не меняется, кроме наследования от \Yum\ORM:
+Код модели не меняется, кроме наследования от \Yup\ORM:
 
 ##### *classes/Model/User.php*
 ~~~
-class Model_User extends ORM {
+class Model_User extends \Yup\ORM {
 
 	// Some data access and domain logic
 }
@@ -147,7 +137,7 @@ class Model_User extends ORM {
 ##### *classes/Controller/User.php*
 ~~~
 $user = new Model_User(1);
-$this->template->user = new Presentation_Model_User->set_model($user);
+$this->template->user = Present::model($user);
 ~~~
 
 Шаблон при этом лишается логики представление данных и содержит лишь разметку:
@@ -168,7 +158,7 @@ $this->template->user = new Presentation_Model_User->set_model($user);
 ##### *classes/Controller/Users.php*
 ~~~
 $users = (new Model_User())->find_all();
-$this->template->users = \Yup\Presentation_Database_Result::factory($users);
+$this->template->users = Present::db_result($users);
 ~~~
 
 ##### *views/user_list.php*
@@ -189,6 +179,8 @@ $this->template->users = \Yup\Presentation_Database_Result::factory($users);
 </table>
 ~~~
 
+Получаемые значения кешируются, и не будут высчитываться при повторных вызовах.
+
 ## Классы и методы
 
 ### \Yup\Presentation
@@ -198,10 +190,11 @@ $this->template->users = \Yup\Presentation_Database_Result::factory($users);
 #### rules
 -----
 
-**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив правил, применяемых к полям сущности. Синтаксис похож на filters() в ORM, но немного видоизменен и расширен. Каждое значение -- массив, содержащий набор функций или методов, вызывающихся последовательно. При этом преобразуемое значение передается в метод/функцию первым параметром.
-Например, если объявлено правило для `'note'    => ['HTML::chars', 'nl2br']`, то при запросе поля note к нему будет применен сначала метод `HTML::chars`, а потом к результату функция `nb2br`, значение которой и будет возвращено.
-Вместо указания класса перед `::` могут быть использованы алиасы `self` и `this` для вызова статичного или обычного метода текущего класса.
-Если требуется передать в метод либо функцию и другие параметры, то вместо строки элементом цепочки нужно поставить массив, в котором первым элементом будет строка с названием функции или метода, а остальные параметры будут добавлены при вызове после преобразуемого значения, например,  `'total_amount' => [['number_format', 2, '.', '']]`.
+**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив правил, применяемых к полям исходной сущности. Ключи массива -- названия полей, которым будут применять правила преобразования. Это могут быть как оригинальные поля модели, так и вычисилимые поля, добавленые классом презентации через методы field_*. Сами преобразования будут вызваны в момент запроса значения (см. [get](#get))
+Преобразования могут быть следующших типов:
+* Анонимная функция с одним входным аргументом, например `function($v){ return $v*2; }`;
+* Строковое имя внешней функции либо статического метода любого класса (можно использовать алиас self для вызова текущего класса, например, `self::format_time`). Преобразуемое значение будет всегда передано первым аргументом. Можно использовать массив, где первым аргументом передать имя функции, а последующими -- список всех аргументов, кроме первого;
+* Массив значений из предыдущих двух пунктов. В этом случае они будут применены последовательно. Например, если объявлено правило для `'note'    => ['HTML::chars', 'nl2br']`, то при запросе поля note к нему будет применен сначала метод `HTML::chars`, а потом к результату функция `nb2br`, значение которой и будет возвращено.
 
 ##### *Parameters*
 *no parameters*
@@ -216,63 +209,23 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
     public function rules()
     {
         return [
-            'created'      => ['Date::formatted_time'],
+            'created'      => 'Date::formatted_time',
 			'total_amount' => [['number_format', 2, '.', '']],
-            'state'   => [['self::values', [
+            'state'   => $this->replace([
                 'new'        => __('New'),
                 'processing' => __('In process'),
                 'completed'  => __('Done'),
                 'cancelled'  => __('Cancelled'),
-            ]]],
+            ]),
             'note'    => ['HTML::chars', 'nl2br'],            
         ];
     }
 }
 ~~~
 
-#### fields
------
-**Description**_: Метод предназначен для перекрытия в потомках. Содержит массив виртуальных полей, значение которых будет вычислено в момент вызова. Для потребителя такие поля ничем не будут отличаться от обычных. Правила преобразования будут применены к этим полям, если они существуют.
-
-##### *Parameters*
-*no parameters*
-
-##### *Return value*
-*array*
-
-##### *Example*
-~~~
-class Presentation_Model_Product extends \Yup\Presentation_Model {
-
-    public function rules()
-    {
-        return [
-            'amount' => [['number_format', 2, '.', '']],
-            'currency' => ['HTML::chars'],
-        ];
-    }
-    
-    public function fields()
-    {
-        return [
-            'amount_with_currency' => 'this::amount_with_currency',
-        ];
-    }
-    
-    protected function amount_with_currency()
-    {
-       return $this->amount . ' ' . $this->currency;
-    }
-}
-
-// ...
-echo $product->amount_with_currency;
-// will return value like "15.50 USD". 
-~~~
-
 #### get
 -----
-**Description**_: Возвращает преобразованное и пригодное к отображению значение поля. После первого вызова значение кэшируется. Вызывается магическим методом __get().
+**Description**_: Возвращает преобразованное и пригодное к отображению значение поля. После первого вызова значение кэшируется. Вызывается магическим методом __get(). Можно добавлять вычисляемые поля, создавая в классе методы с названием field_{имя поля}. Если поле к которому происходит обращение, является ORM-объектом (например, при использовании belongs to), то на него при вызове также будет наложена обертка Presentation Model.
 
 ##### *Parameters*
 *string*: field Имя поля.
@@ -300,28 +253,15 @@ echo $user->name; // same as $user->get('name');
 echo $user->original('name');
 ~~~
 
-#### values
+#### replace
 -----
-**Description**_: Вспомогательный статичный метод для использования в правилах преобразования в потомках. Заменяет параметр value на значение элемента массива replacements, если найден соответствующий ключ.
+**Description**_: Вспомогательный метод для использования в правилах преобразования в потомках. Возвращает функцию, заменяющую исходное значение на значение элемента массива replacements при вызове.
 
 ##### *Parameters*
-*string*: value Сравниваемое значение.
-
 *array*: replacements Ассоциативный массив для заменяемых значений.
 
 ##### *Return value*
 *string*: Результат замены, или оригинальная строка, если соотвествия не найдено.
-
-##### *Example*
-~~~
-$state = 'completed';
-$state_caption = \Yup\Presenter::values($state, [
-	'new' => 'New',
-	'completed' => 'Done',
-]);
-
-// return 'Done'
-~~~
 
 #### as_array
 -----
@@ -330,6 +270,15 @@ $state_caption = \Yup\Presenter::values($state, [
 #### clear_cache
 -----
 **Description**_: очищает внутренний кэш для преобразованных и рассчитанных полей. 
+
+#### $_context
+-----
+**Description**_: Статичное свойство, позволяет менять префикс для создаваемых классов, в случаа нескольких различных контекстов вывода (например, для XML или JSON). 
+
+##### *Example*
+~~~
+\Yup\Presentation::$_context = 'XML';
+~~~
 
 ### \Yup\Presentation_Model
 
@@ -344,7 +293,7 @@ $state_caption = \Yup\Presenter::values($state, [
 Не обязательный параметр. Если задан, класс определяется на основе класса модели. Можно передавать как имя класса, так и экземпляр модели. Если не задан, создается экземпляр класса, метод которого вызван.
 
 ##### *Return value*
-*\Yum\Presentation_Model*
+*\Yup\Presentation_Model*
 
 ##### *Example*
 ~~~
@@ -360,10 +309,10 @@ $user = \Yup\Presentation_Model::factory($user_model);
 **Description**_: Сеттер, задающий значение модели.
 
 ##### *Parameters*
-*\Yum\ORM*: model
+*\Yup\ORM*: model
 
 ##### *Return value*
-*\Yum\Presentation_Model*: $this
+*\Yup\Presentation_Model*: $this
 
 #### make
 -----
@@ -373,7 +322,7 @@ $user = \Yup\Presentation_Model::factory($user_model);
 *array*: $fields
 
 ##### *Return value*
-*\Yum\Presentation_Model*: $this
+*\Yup\Presentation_Model*: $this
 
 ##### *Example*
 ~~~
@@ -423,11 +372,11 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 	public function rules()
     {
         return [
-            'state' => [['self::values', [
+            'state' => $this->replace([
                 'new'        => __('New'),
                 'processing' => __('In process'),
                 'completed'  => __('Done'),
-            ]]],
+            ]),
         ];
     }
 }
@@ -446,4 +395,76 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 <option name="processing" selected="selected">In process</option>
 <option name="completed">Done</option>
 </select>
+~~~
+
+### \Present
+
+Набор статичных методов, предоставляющих упрощенные вызовы для создания презентационных классов.
+
+#### model
+-----
+**Description**_: Метод для создания Presentation Model на осове ORM-модели.
+
+##### *Parameters*
+*\Yup\ORM*: model
+
+##### *Return value*
+*\Yup\Presentation_Model*
+
+##### *Example*
+~~~
+$user = new Model_User(1);
+$this->template->user = Present::model($user);
+~~~
+
+#### data
+-----
+**Description**_: Метод для создания Presentation Model на осове произвольных именованных данных.
+
+##### *Parameters*
+*string*: name
+*array*: data
+
+##### *Return value*
+*\Yup\Presentation_Data*
+
+##### *Example*
+~~~
+$data = ['currency_id' => 1, 'amount' => 5.5];
+$this->template->currency = Present::data('currency', $data);
+~~~
+
+#### db_result
+-----
+**Description**_: Метод для создания обертки для списковых данных, полученных из БД.
+
+##### *Parameters*
+*\Database_Result*: db_result
+
+##### *Return value*
+*\Yup\Presentation_Database_Result*
+
+##### *Example*
+~~~
+$users = (new Model_User())->find_all();
+$this->template->users = Present::db_result($users);
+~~~
+
+#### data_list
+-----
+**Description**_: Метод для создания обертки-итератора для произвольных списковых данных.
+
+##### *Parameters*
+*array*: list
+
+##### *Return value*
+*\Yup\Presentation_List*
+
+##### *Example*
+~~~
+$products = array(
+    Present::data('product', $this->get_product_data(1)),
+    Present::data('product', $this->get_product_data(2)),
+);
+$this->template->products = Present::data_list($products);
 ~~~
