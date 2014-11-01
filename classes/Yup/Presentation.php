@@ -71,7 +71,7 @@ abstract class Presentation {
 
 	protected static function full_class_prefix()
 	{
-		return implode('_', array_filter([static::$_class_prefix, static::$_context, static::$_type])) . '_';
+		return implode('_', array_filter(array(static::$_class_prefix, static::$_context, static::$_type))) . '_';
 	}
 
 	/*
