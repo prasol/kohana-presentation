@@ -1,0 +1,26 @@
+{
+	"name":        "yup/kohana-presentation-layer",
+	"type":        "kohana-module",
+	"description": "Presentation Layer module for Kohana Framework",	
+	"homepage":    "https://github.com/prasol/kohanapresentation",
+	"license":     "BSD-3-Clause",
+	"keywords":    ["kohana", "module", "presentation layer"],
+	"authors": [
+		{
+			"name":     "Yanis Prasol",
+			"email":    "geromail@gmail.com",
+			"role":     "developer"
+		}
+	],
+	"require": {
+		"kohana/core":">=3.1",
+		"kohana/orm": ">=3.1",
+		"php":        ">=5.3.0"
+	},
+	"repositories":[
+        {
+            "type":"git",
+            "url":"https://github.com/prasol/kohanapresentation"
+        }
+    ]
+}
