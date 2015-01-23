@@ -2,7 +2,7 @@
 	"name":        "yup/kohana-presentation-layer",
 	"type":        "kohana-module",
 	"description": "Presentation Layer module for Kohana Framework",	
-	"homepage":    "https://github.com/prasol/kohanapresentation",
+	"homepage":    "https://github.com/prasol/kohana-presentation",
 	"license":     "BSD-3-Clause",
 	"keywords":    ["kohana", "module", "presentation layer"],
 	"authors": [
@@ -20,7 +20,7 @@
 	"repositories":[
         {
             "type":"git",
-            "url":"https://github.com/prasol/kohanapresentation"
+            "url":"https://github.com/prasol/kohana-presentation"
         }
     ]
 }
