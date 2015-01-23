@@ -238,7 +238,7 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 echo $user->name; // same as $user->get('name');
 ~~~
 
-#### original
+#### raw
 -----
 **Description**_: Возвращает оригинальное значение поля, без преобразований.
 
@@ -250,7 +250,7 @@ echo $user->name; // same as $user->get('name');
 
 ##### *Example*
 ~~~
-echo $user->original('name');
+echo $user->raw('name');
 ~~~
 
 #### replace
@@ -384,7 +384,7 @@ class Presentation_Model_Order extends \Yup\Presentation_Model {
 
 В шаблоне теперь можно удобно формировать, например, выпадающие списки в формах редактирования:
 ~~~
-<?= Form::select('state', $order->states, $order->original('state')) ?>
+<?= Form::select('state', $order->states, $order->raw('state')) ?>
 ~~~
 
 Выведет код (если значение order->state равно processing):

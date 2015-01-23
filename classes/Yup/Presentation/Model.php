@@ -140,9 +140,9 @@ class Presentation_Model extends Presentation {
 	 * @param $field string
 	 * @return mixed
 	 */
-	public function original($field)
+	public function raw($field)
 	{
-		$value = parent::original($field);
+		$value = parent::raw($field);
 		if ($value instanceof ORM)
 		{
 			throw new \Kohana_Exception('No direct access to original model :model from presentation layer', array(

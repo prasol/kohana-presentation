@@ -252,7 +252,7 @@ abstract class Presentation {
 	 * @param  string $field
 	 * @return mixed
 	 */
-	public function original($field)
+	public function raw($field)
 	{
 		return $this->fetch_value($field);
 	}
