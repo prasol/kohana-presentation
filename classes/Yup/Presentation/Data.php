@@ -69,7 +69,7 @@ class Presentation_Data extends Presentation {
 	/*
 	 * @return array
 	 */
-	protected function _as_array()
+	protected function get_basic_array()
 	{
 		$result = array();
 

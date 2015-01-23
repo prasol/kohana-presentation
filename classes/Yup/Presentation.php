@@ -262,7 +262,7 @@ abstract class Presentation {
 	 */
 	public function as_array()
 	{
-		$result = $this->_as_array();
+		$result = $this->get_basic_array();
 		$reflection = new \ReflectionClass($this);
 		foreach ($reflection->getMethods() as $method)
 		{
@@ -300,7 +300,7 @@ abstract class Presentation {
 	/*
 	 * @return array
 	 */
-	abstract protected function _as_array();
+	abstract protected function get_basic_array();
 
 	/*
 	 * Override this method

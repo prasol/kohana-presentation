@@ -145,7 +145,7 @@ class Presentation_Model extends Presentation {
 		$value = parent::original($field);
 		if ($value instanceof ORM)
 		{
-			throw new \Kohana_Exception('No direct access to original model :model from presentation', array(
+			throw new \Kohana_Exception('No direct access to original model :model from presentation layer', array(
 				':model' => get_class($value)
 			));
 		}
@@ -164,7 +164,7 @@ class Presentation_Model extends Presentation {
 	/*
 	 * @return array
 	 */
-	protected function _as_array()
+	protected function get_basic_array()
 	{
 		$object = array();
 
